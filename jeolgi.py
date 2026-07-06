@@ -49,18 +49,39 @@ if st.sidebar.button("구간 판별하기", type="primary"):
             )))
             t1 = ts.from_datetime(local_dt)
             
-            # 이분이지 이벤트 검색 (0:춘분, 1:하지, 2:추분, 3:동지)
-            t_events, y_events = almanac.find_discrete(t0, t1, almanac.seasons(eph))
+            # 24절기 검색 함수 정의
+            def solar_terms(eph):
+                earth = eph['earth']
+                sun = eph['sun']
+                
+                def solar_term_at(t):
+                    astrometric = earth.at(t).observe(sun)
+                    apparent = astrometric.apparent()
+                    _, lon, _ = apparent.ecliptic_latlon()
+                    return (lon.degrees // 15).astype(int) % 24
+                
+                solar_term_at.step_days = 14.0
+                return solar_term_at
+
+            # 24절기 검색
+            t_events, y_events = almanac.find_discrete(t0, t1, solar_terms(eph))
             
             if len(t_events) > 0:
                 last_event_index = y_events[-1]
                 last_event_time = t_events[-1].astimezone(kst)
                 
-                season_names = {0: "춘분", 1: "하지", 2: "추분", 3: "동지"}
+                TERMS_24 = [
+                    "춘분", "청명", "곡우", "입하", "소만", "망종",
+                    "하지", "소서", "대서", "입추", "처서", "백로",
+                    "추분", "한로", "상강", "입동", "소설", "대설",
+                    "동지", "소한", "대한", "입춘", "우수", "경칩"
+                ]
+                
                 output_mapping = {0: "춘분이후", 1: "하지이후", 2: "추분이후", 3: "동지이후"}
                 
-                current_season = season_names[last_event_index]
-                result_period = output_mapping[last_event_index]
+                current_term = TERMS_24[last_event_index]
+                season_idx = last_event_index // 6
+                result_period = output_mapping[season_idx]
                 
                 # --- 결과 출력 화면 ---
                 st.success(f"### 판별 결과: **{result_period}**")
@@ -69,9 +90,9 @@ if st.sidebar.button("구간 판별하기", type="primary"):
                 with col1:
                     st.metric(label="입력된 기준 시각", value=local_dt.strftime('%Y-%m-%d %H:%M'))
                 with col2:
-                    st.metric(label="가장 가까운 직전 절기", value=f"{current_season}")
+                    st.metric(label="현재의 절기", value=f"{current_term}")
                 
-                st.info(f"💡 **참고:** 기준 시각 직전에 통과한 절기는 **{last_event_time.strftime('%Y-%m-%d %H:%M KST')}**에 절입된 **{current_season}**입니다.")
+                st.info(f"💡 **참고:** 기준 시각 직전에 통과한 절기는 **{last_event_time.strftime('%Y-%m-%d %H:%M KST')}**에 절입된 **{current_term}**입니다.")
             else:
                 st.error("지정된 범위 내에서 절입 시점을 찾을 수 없습니다. 입력 날짜를 확인해 주세요.")
                 
