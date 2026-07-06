@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import pytz
 from skyfield.api import load
 from skyfield import almanac
@@ -28,8 +28,9 @@ input_date = st.sidebar.date_input(
     min_value=datetime(1550, 1, 1).date(),
     max_value=datetime(2650, 1, 1).date()
 )
-input_hour = st.sidebar.slider("시간 (시)", 0, 23, 12, step=1)
-input_minute = st.sidebar.slider("분 (분)", 0, 59, 0, step=1)
+input_time = st.sidebar.time_input("시간 선택", value=time(12, 0))
+input_hour = input_time.hour
+input_minute = input_time.minute
 
 if st.sidebar.button("구간 판별하기", type="primary"):
     with st.spinner("Skyfield로 정밀 천체 데이터 계산 중..."):
