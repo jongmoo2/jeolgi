@@ -1,3 +1,4 @@
-streamlit
-skyfield
-pytz
+streamlit>=1.30.0
+skyfield>=1.48
+pytz>=2023.3.post1
+korean_lunar_calendar>=0.3.1

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, time
 import pytz
 from skyfield.api import load
 from skyfield import almanac
+from korean_lunar_calendar import KoreanLunarCalendar
 
 # 1. 천체 데이터 캐싱 (최초 1회만 로드하여 속도 최적화)
 @st.cache_resource
@@ -22,6 +23,11 @@ st.write("지정한 날짜와 시각의 직전 절기를 계산하여 현재 어
 st.sidebar.header("📅 년월일시 입력")
 
 # 사이드바 입력 컴포넌트
+calendar_type = st.sidebar.radio("달력 종류", ["양력", "음력"], horizontal=True)
+is_leap_month = False
+if calendar_type == "음력":
+    is_leap_month = st.sidebar.checkbox("윤달")
+
 input_date = st.sidebar.date_input(
     "날짜 선택", 
     datetime.now().date(),
@@ -35,10 +41,21 @@ input_minute = input_time.minute
 if st.sidebar.button("구간 판별하기", type="primary"):
     with st.spinner("Skyfield로 정밀 천체 데이터 계산 중..."):
         try:
+            if calendar_type == "음력":
+                cal = KoreanLunarCalendar()
+                cal.setLunarDate(input_date.year, input_date.month, input_date.day, is_leap_month)
+                solar_date_str = cal.SolarIsoFormat()
+                if not solar_date_str:
+                    st.error("유효하지 않은 음력 날짜입니다.")
+                    st.stop()
+                solar_year, solar_month, solar_day = map(int, solar_date_str.split('-'))
+            else:
+                solar_year, solar_month, solar_day = input_date.year, input_date.month, input_date.day
+
             # datetime 객체 생성 및 한국 표준시(KST) 설정
             kst = pytz.timezone('Asia/Seoul')
             local_dt = kst.localize(datetime(
-                input_date.year, input_date.month, input_date.day, input_hour, input_minute
+                solar_year, solar_month, solar_day, input_hour, input_minute
             ))
             
             # 검색 범위 설정 (입력일 기준 185일 전부터 입력일까지)
