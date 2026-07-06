@@ -1,7 +1,8 @@
 import streamlit as st
 from datetime import datetime, timedelta
 import pytz
-from skyfield.api import load, almanac
+from skyfield.api import load
+from skyfield import almanac
 
 # 1. 천체 데이터 캐싱 (최초 1회만 로드하여 속도 최적화)
 @st.cache_resource
