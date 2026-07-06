@@ -14,9 +14,9 @@ def load_astronomy_data():
 ts, eph = load_astronomy_data()
 
 # --- UI 구성 ---
-st.set_page_config(page_title="이분이지(二分二至) 구간 판별기", layout="centered")
+st.set_page_config(page_title="절기 구간 판별기", layout="centered")
 
-st.title("🌓 이분이지(二分二至) 구간 판별 프로그램")
+st.title("🌓 절기 구간 판별 프로그램")
 st.write("지정한 날짜와 시각의 직전 절기를 계산하여 현재 어느 구간에 속해 있는지 판별합니다.")
 
 st.sidebar.header("📅 년월일시 입력")
