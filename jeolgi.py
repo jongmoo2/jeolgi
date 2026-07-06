@@ -22,7 +22,12 @@ st.write("지정한 날짜와 시각의 직전 절기를 계산하여 현재 어
 st.sidebar.header("📅 년월일시 입력")
 
 # 사이드바 입력 컴포넌트
-input_date = st.sidebar.date_input("날짜 선택", datetime.now().date())
+input_date = st.sidebar.date_input(
+    "날짜 선택", 
+    datetime.now().date(),
+    min_value=datetime(1550, 1, 1).date(),
+    max_value=datetime(2650, 1, 1).date()
+)
 input_hour = st.sidebar.slider("시간 (시)", 0, 23, 12, step=1)
 input_minute = st.sidebar.slider("분 (분)", 0, 59, 0, step=1)
 
